@@ -21,3 +21,7 @@ We can represent Html like this or some other nested html elements as an object 
     }
   ]
 }
+
+update 1: A simple example of creating a virtual DOM tree without props.
+Before use this example you should read this https://babeljs.io/docs/en/babel-plugin-transform-react-jsx/
+It recompiles the script with jsx syntax into normal js, which browsers could read
