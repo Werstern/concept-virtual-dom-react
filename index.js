@@ -5,7 +5,6 @@
   <li>foo</li>
   <li>bar</li>
 </ol>
-
 {
   type: 'ol',
   props: {
@@ -36,37 +35,100 @@ function createElement(type, props, ...children) {
   return { type, props, children };
 }
 
-function renderNode(type, targetDomNode) {
-	const node = document.createElement(type);
-	targetDomNode.appendChild(node);
-
-  return node;
-}
-
-function renderTextNode(text, targetDomNode) {
-	const textNode = document.createTextNode(text);
-    targetDomNode.appendChild(textNode);
-
-    return textNode;
+function createNode(element) {
+	if (typeof element === 'string') {
+  	return document.createTextNode(element);
+  } else {
+  	return document.createElement(element.type);
+  }
 }
 
 function render(element, targetDomNode) {
-	if (typeof element === 'string') {
-    return renderTextNode(element, targetDomNode);
+
+	const node = createNode(element);
+  targetDomNode.appendChild(node);
+
+  if (typeof element !== 'string') {
+  	element.children.forEach(child => render(child, node));
+  }
+}
+
+function hasElementChanged(prevElement, nextElement) {
+	return (
+  	typeof prevElement !== typeof nextElement
+		|| (
+    	typeof prevElement === 'string'
+      && prevElement !== nextElement
+    )
+    || prevElement.type !== nextElement.type
+  );
+}
+
+function diff(prevElement, nextElement, targetDomNode, childIndex = 0) {
+	const child = targetDomNode.childNodes[childIndex];
+
+  console.log(
+  	prevElement,
+  	nextElement,
+    targetDomNode,
+    child,
+    childIndex
+  );
+
+	if (!nextElement) {
+  	console.log('!nextElement');
+  	return targetDomNode.removeChild(child);
   }
 
-	const node = renderNode(element.type, targetDomNode)
-  element.children.forEach(child => render(child, node));
+  if (!prevElement) {
+  	console.log('!prevElement');
+  	return render(nextElement, targetDomNode);
+  }
+
+  if (hasElementChanged(prevElement, nextElement)) {
+  	console.log('hasElementChanged');
+    return targetDomNode.replaceChild(createNode(nextElement), child);
+  }
+
+  if (typeof prevElement !== 'string') {
+  	const maxChildrenLength = Math.max(prevElement.children.length, nextElement.children.length);
+
+    for (let i = 0; i < maxChildrenLength; i++) {
+      diff(
+        prevElement.children[i],
+        nextElement.children[i],
+        child,
+        i
+      );
+    }
+  }
 }
 
 const listWithJSX = (
 	<ol>
-    <li>foo <b>and</b> bar <br /> ho</li>
-    <li>hello <button>click me</button></li>
+    <li>foo </li>
+    <li>bar</li>
   </ol>
 );
 
+const listWithJSX2 = (
+	<ol>
+    <li>foosss <button>hi</button></li>
+  </ol>
+);
+
+const rootDomNode = document.getElementById("root");
+const updateButton = document.getElementById("update");
+
 render(
 	listWithJSX,
-  document.getElementById("root")
+  rootDomNode
 );
+
+updateButton.addEventListener('click', () => {
+	diff(
+  listWithJSX,
+  listWithJSX2,
+  rootDomNode
+  )
+});
