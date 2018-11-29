@@ -27,3 +27,5 @@ Before use this example you should read this https://babeljs.io/docs/en/babel-pl
 It recompiles the script with jsx syntax into normal js, which browsers could read
 
 update 2: Added re rendering element when the virtual DOM tree has changed (without props).
+
+update 3: Added props

@@ -32,19 +32,58 @@ console.log(list);
 */
 
 function createElement(type, props, ...children) {
-  return { type, props, children };
+  return { type, props: props || {}, children };
 }
 
 function createNode(element) {
 	if (typeof element === 'string') {
   	return document.createTextNode(element);
   } else {
-  	return document.createElement(element.type);
+  	const node = document.createElement(element.type);
+    setProps(node, element.props);
+
+    return node;
   }
 }
 
-function render(element, targetDomNode) {
+function setProps(node, props) {
+	Object.keys(props).forEach(key =>
+  	node.setAttribute(key, props[key])
+  );
+}
 
+function updateProps(prevProps, nextProps, targetDomNode) {
+	Object.keys(prevProps).forEach(key =>
+  	targetDomNode.removeAttribute(key)
+  );
+
+  setProps(targetDomNode, nextProps);
+}
+
+function updatePropsDiff(prevProps, nextProps, targetDomNode) {
+
+  Object.keys(prevProps).forEach(key => {
+  	if (!nextProps[key]) {
+    	return targetDomNode.removeAttribute(key);
+    }
+
+  	if (prevProps[key] !== nextProps[key]) {
+    	return targetDomNode.setAttribute(key, nextProps[key]);
+    }
+  });
+
+    Object.keys(nextProps).forEach(key => {
+  	if (!prevProps[key]) {
+    	return targetDomNode.setAttribute(key, nextProps[key]);
+    }
+
+  	if (prevProps[key] !== nextProps[key]) {
+    	return targetDomNode.setAttribute(key, nextProps[key])
+    }
+  });
+}
+
+function render(element, targetDomNode) {
 	const node = createNode(element);
   targetDomNode.appendChild(node);
 
@@ -67,14 +106,6 @@ function hasElementChanged(prevElement, nextElement) {
 function diff(prevElement, nextElement, targetDomNode, childIndex = 0) {
 	const child = targetDomNode.childNodes[childIndex];
 
-  console.log(
-  	prevElement,
-  	nextElement,
-    targetDomNode,
-    child,
-    childIndex
-  );
-
 	if (!nextElement) {
   	console.log('!nextElement');
   	return targetDomNode.removeChild(child);
@@ -91,6 +122,8 @@ function diff(prevElement, nextElement, targetDomNode, childIndex = 0) {
   }
 
   if (typeof prevElement !== 'string') {
+  	updatePropsDiff(prevElement.props, nextElement.props, child);
+
   	const maxChildrenLength = Math.max(prevElement.children.length, nextElement.children.length);
 
     for (let i = 0; i < maxChildrenLength; i++) {
@@ -104,16 +137,41 @@ function diff(prevElement, nextElement, targetDomNode, childIndex = 0) {
   }
 }
 
-const listWithJSX = (
+const prevList = (
 	<ol>
-    <li>foo </li>
-    <li>bar</li>
+    <li style="color: blue">foo</li>
+    <li style="color: red" class="bold">bar</li>
+    <li style="color: navy" class="bold">bar</li>
+    <li style="color: brown" class="test">bar</li>
+    <li style="color: yellow" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: red" class="bold">bar</li>
+    <li style="color: green" class="bold">bar</li>
+    <li style="color: green" class="bold">bar</li>
   </ol>
 );
 
-const listWithJSX2 = (
+const nextList = (
 	<ol>
-    <li>foosss <button>hi</button></li>
+    <li style="color: blue">foo</li>
+    <li style="color: purple" class="bold">bar</li>
+    <li style="color: navy" class="test">bar</li>
+    <li style="color: brown" class="test">bar</li>
+    <li style="color: black" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: white" class="bold">bar</li>
+    <li style="color: red" class="bold">bar</li>
+    <li style="color: green" class="bold">bar</li>
+    <li style="color: green" class="bold">bar</li>
   </ol>
 );
 
@@ -121,14 +179,14 @@ const rootDomNode = document.getElementById("root");
 const updateButton = document.getElementById("update");
 
 render(
-	listWithJSX,
+	prevList,
   rootDomNode
 );
 
 updateButton.addEventListener('click', () => {
 	diff(
-  listWithJSX,
-  listWithJSX2,
-  rootDomNode
+    prevList,
+    nextList,
+    rootDomNode
   )
 });
