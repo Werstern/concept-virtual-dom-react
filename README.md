@@ -29,3 +29,5 @@ It recompiles the script with jsx syntax into normal js, which browsers could re
 update 2: Added re rendering element when the virtual DOM tree has changed (without props).
 
 update 3: Added props
+
+update 4: Added bundle.js
