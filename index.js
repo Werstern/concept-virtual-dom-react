@@ -36,10 +36,10 @@ function createElement(type, props, ...children) {
 }
 
 function createNode(element) {
-	if (typeof element === 'string') {
-  	return document.createTextNode(element);
+  if (typeof element === 'string') {
+    return document.createTextNode(element);
   } else {
-  	const node = document.createElement(element.type);
+    const node = document.createElement(element.type);
     setProps(node, element.props);
 
     return node;
@@ -47,14 +47,14 @@ function createNode(element) {
 }
 
 function setProps(node, props) {
-	Object.keys(props).forEach(key =>
-  	node.setAttribute(key, props[key])
+  Object.keys(props).forEach(key =>
+    node.setAttribute(key, props[key])
   );
 }
 
 function updateProps(prevProps, nextProps, targetDomNode) {
-	Object.keys(prevProps).forEach(key =>
-  	targetDomNode.removeAttribute(key)
+  Object.keys(prevProps).forEach(key =>
+    targetDomNode.removeAttribute(key)
   );
 
   setProps(targetDomNode, nextProps);
@@ -63,40 +63,40 @@ function updateProps(prevProps, nextProps, targetDomNode) {
 function updatePropsDiff(prevProps, nextProps, targetDomNode) {
 
   Object.keys(prevProps).forEach(key => {
-  	if (!nextProps[key]) {
-    	return targetDomNode.removeAttribute(key);
+    if (!nextProps[key]) {
+      return targetDomNode.removeAttribute(key);
     }
 
-  	if (prevProps[key] !== nextProps[key]) {
-    	return targetDomNode.setAttribute(key, nextProps[key]);
+    if (prevProps[key] !== nextProps[key]) {
+      return targetDomNode.setAttribute(key, nextProps[key]);
     }
   });
 
-    Object.keys(nextProps).forEach(key => {
-  	if (!prevProps[key]) {
-    	return targetDomNode.setAttribute(key, nextProps[key]);
+  Object.keys(nextProps).forEach(key => {
+    if (!prevProps[key]) {
+      return targetDomNode.setAttribute(key, nextProps[key]);
     }
 
-  	if (prevProps[key] !== nextProps[key]) {
-    	return targetDomNode.setAttribute(key, nextProps[key])
+    if (prevProps[key] !== nextProps[key]) {
+      return targetDomNode.setAttribute(key, nextProps[key])
     }
   });
 }
 
 function render(element, targetDomNode) {
-	const node = createNode(element);
+  const node = createNode(element);
   targetDomNode.appendChild(node);
 
   if (typeof element !== 'string') {
-  	element.children.forEach(child => render(child, node));
+    element.children.forEach(child => render(child, node));
   }
 }
 
 function hasElementChanged(prevElement, nextElement) {
-	return (
-  	typeof prevElement !== typeof nextElement
-		|| (
-    	typeof prevElement === 'string'
+  return (
+    typeof prevElement !== typeof nextElement
+    || (
+      typeof prevElement === 'string'
       && prevElement !== nextElement
     )
     || prevElement.type !== nextElement.type
@@ -104,27 +104,24 @@ function hasElementChanged(prevElement, nextElement) {
 }
 
 function diff(prevElement, nextElement, targetDomNode, childIndex = 0) {
-	const child = targetDomNode.childNodes[childIndex];
+  const child = targetDomNode.childNodes[childIndex];
 
-	if (!nextElement) {
-  	console.log('!nextElement');
-  	return targetDomNode.removeChild(child);
+  if (!nextElement) {
+    return targetDomNode.removeChild(child);
   }
 
   if (!prevElement) {
-  	console.log('!prevElement');
-  	return render(nextElement, targetDomNode);
+    return render(nextElement, targetDomNode);
   }
 
   if (hasElementChanged(prevElement, nextElement)) {
-  	console.log('hasElementChanged');
     return targetDomNode.replaceChild(createNode(nextElement), child);
   }
 
   if (typeof prevElement !== 'string') {
-  	updatePropsDiff(prevElement.props, nextElement.props, child);
+    updatePropsDiff(prevElement.props, nextElement.props, child);
 
-  	const maxChildrenLength = Math.max(prevElement.children.length, nextElement.children.length);
+    const maxChildrenLength = Math.max(prevElement.children.length, nextElement.children.length);
 
     for (let i = 0; i < maxChildrenLength; i++) {
       diff(
@@ -138,7 +135,7 @@ function diff(prevElement, nextElement, targetDomNode, childIndex = 0) {
 }
 
 const prevList = (
-	<ol>
+  <ol>
     <li style="color: blue">foo</li>
     <li style="color: red" class="bold">bar</li>
     <li style="color: navy" class="bold">bar</li>
@@ -157,7 +154,7 @@ const prevList = (
 );
 
 const nextList = (
-	<ol>
+  <ol>
     <li style="color: blue">foo</li>
     <li style="color: purple" class="bold">bar</li>
     <li style="color: navy" class="test">bar</li>
@@ -179,12 +176,12 @@ const rootDomNode = document.getElementById("root");
 const updateButton = document.getElementById("update");
 
 render(
-	prevList,
+  prevList,
   rootDomNode
 );
 
 updateButton.addEventListener('click', () => {
-	diff(
+  diff(
     prevList,
     nextList,
     rootDomNode
